@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoBench: Benchmarking World Modeling in Dynamically Changing Environments</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --accent-green: #16a34a;
+    --accent-red: #dc2626;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: white;
+    padding: 60px 0 48px;
+    text-align: center;
+  }
+  header h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+  header .subtitle { font-size: 1.2rem; opacity: 0.9; max-width: 800px; margin: 0 auto 24px; }
+  header .venue {
+    display: inline-block;
+    font-size: 0.95rem;
+    margin-top: 8px;
+    opacity: 0.85;
+  }
+  .anon-note {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-top: 16px;
+  }
+
+  /* Navigation */
+  nav {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+    flex-wrap: wrap;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  nav a:hover { background: var(--primary-light); color: var(--primary); }
+
+  /* Sections */
+  section { padding: 48px 0; }
+  section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  section h3 {
+    font-size: 1.3rem;
+    margin: 24px 0 12px;
+    color: var(--primary);
+  }
+  .section-desc {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    max-width: 800px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  /* Key findings highlight */
+  .finding {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-weight: 500;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .stat-card .label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 16px 0;
+  }
+  th, td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  th {
+    background: #f1f5f9;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  td:first-child, th:first-child { text-align: left; }
+  tr:hover { background: #f8fafc; }
+  .best { font-weight: 700; color: var(--primary); }
+  .second { text-decoration: underline; }
+  .group-header { background: #e9edf6 !important; font-weight: 600; text-align: center !important; }
+
+  /* Video grid */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .video-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .video-card video {
+    width: 100%;
+    display: block;
+  }
+  .video-card .video-label {
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .video-card .video-tag {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .tag-ci2v { background: #dbeafe; color: #1d4ed8; }
+  .tag-3d { background: #dcfce7; color: #166534; }
+  .tag-i2v { background: #fef3c7; color: #92400e; }
+  .tag-gt { background: #e0e7ff; color: #3730a3; }
+
+  /* Clip selector */
+  .clip-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .clip-btn {
+    padding: 8px 20px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .clip-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .clip-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
+  /* Images */
+  .img-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+  .img-row img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .img-full { text-align: center; margin: 20px 0; }
+  .img-full img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .img-caption {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* Footer */
+  footer {
+    background: #1e293b;
+    color: #94a3b8;
+    padding: 32px 0;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.8rem; }
+    .video-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="container">
+    <h1>MemoBench</h1>
+    <p class="subtitle">Benchmarking World Modeling in Dynamically Changing Environments</p>
+    <span class="venue">ECCV 2026 Submission #2122</span>
+    <p class="anon-note">Anonymous submission &mdash; author information withheld for review</p>
+  </div>
+</header>
+
+<!-- Navigation -->
+<nav>
+  <div class="container">
+    <ul>
+      <li><a href="#qualitative">Qualitative</a></li>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#dataset">Dataset</a></li>
+      <li><a href="#metrics">Metrics</a></li>
+      <li><a href="#results-auto">Automated Results</a></li>
+      <li><a href="#results-vqa">VQA Results</a></li>
+      <li><a href="#radar">Radar Charts</a></li>
+      <li><a href="#validation">Human Validation</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Teaser -->
+<section style="padding: 48px 0 0;">
+  <div class="container">
+    <div class="img-full">
+      <img src="images/teaser.png" alt="MemoBench Teaser" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border); background: white;">
+      <p class="img-caption">Teaser: MemoBench evaluates memory consistency in world generation models through a disappear-and-reappear paradigm.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Qualitative -->
+<section id="qualitative">
+  <div class="container">
+    <h2>Qualitative Comparisons</h2>
+    <p class="section-desc">
+      Compare generated videos across all 8 models. Use the arrows, keyboard, or clip bar to browse scenes.
+    </p>
+
+    <!-- Top clip navigation bar -->
+    <div class="clip-topbar" id="clip-topbar">
+      <button class="topbar-arrow topbar-arrow-left" onclick="prevClip()" title="Previous clip">&#10094;</button>
+      <div class="topbar-clips" id="topbar-clips">
+        <!-- Filled by JS -->
+      </div>
+      <button class="topbar-arrow topbar-arrow-right" onclick="nextClip()" title="Next clip">&#10095;</button>
+    </div>
+
+    <!-- Carousel wrapper -->
+    <div class="carousel-wrapper">
+      <button class="carousel-arrow carousel-arrow-left" onclick="prevClip()" title="Previous scene">&#10094;</button>
+
+      <div class="carousel-center">
+        <div class="carousel-header">
+          <span class="carousel-counter" id="carousel-counter">1 / 6</span>
+          <h3 class="carousel-title" id="carousel-title">Barnyard (Synthetic)</h3>
+          <span class="carousel-type" id="carousel-type">Synthetic</span>
+        </div>
+
+        <div id="clip-display">
+          <!-- Filled by JS -->
+        </div>
+
+        <div class="carousel-controls">
+          <button onclick="playAll()" class="ctrl-btn ctrl-play">Play All</button>
+          <button onclick="pauseAll()" class="ctrl-btn ctrl-pause">Pause All</button>
+          <div class="carousel-dots" id="carousel-dots"></div>
+        </div>
+      </div>
+
+      <button class="carousel-arrow carousel-arrow-right" onclick="nextClip()" title="Next scene">&#10095;</button>
+    </div>
+  </div>
+</section>
+
+<!-- Overview -->
+<section id="overview">
+  <div class="container">
+    <h2>Overview</h2>
+    <p class="section-desc">
+      MemoBench is a diagnostic benchmark for evaluating <strong>memory consistency</strong> in world generation models.
+      Each clip follows a <em>disappear-and-reappear</em> structure: a target object is visible, the camera pans away
+      causing it to disappear, and then the camera returns, requiring the model to faithfully recover the object's
+      appearance, position, and state.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="number">360</div>
+        <div class="label">Ground-truth video clips</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">1080p</div>
+        <div class="label">Resolution (60 FPS syn / 30 FPS real)</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">8</div>
+        <div class="label">Models benchmarked</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">10</div>
+        <div class="label">Automated metrics</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">4</div>
+        <div class="label">VQA dimensions</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Three-Phase Paradigm</h4>
+      <p>Every benchmark clip is divided into three phases:</p>
+      <ul style="margin: 12px 0 0 20px;">
+        <li><strong>Visible (V):</strong> Target object is fully in view.</li>
+        <li><strong>Disappeared (D):</strong> Camera has panned away; target is completely out of the field of view.</li>
+        <li><strong>Reappear (R):</strong> Camera returns; the model must recover the target's updated state.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Dataset -->
+<section id="dataset" style="background: white;">
+  <div class="container">
+    <h2>Dataset</h2>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="number">196</div>
+        <div class="label">Synthetic clips (14 scenes, 5 categories)</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">164</div>
+        <div class="label">Real-world clips (30 processes, 7 categories)</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>Synthetic Data</h4>
+      <p>Rendered in Unreal Engine 5 with diverse 3D scenes and animated target objects. Includes per-frame RGB, metric depth, camera intrinsics, and camera-to-world poses.</p>
+      <div class="img-full" style="margin: 16px 0 0;">
+        <img src="images/sunburst_synthetic.png" alt="Synthetic dataset overview: 14 scenes, 5 categories" style="max-width: 560px;">
+        <p class="img-caption">Synthetic data: 14 scenes across 5 categories with UE5-rendered ground truth.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h4>Real-World Data</h4>
+      <p>Captured in controlled indoor settings covering 30 physical-state-change processes (e.g., dissolving, melting, pouring) across categories that depend on viscosity, elasticity, and thermal conductivity.</p>
+      <div class="img-full" style="margin: 16px 0 0;">
+        <img src="images/sunburst_real.png" alt="Real-world dataset overview: 30 processes, 7 categories" style="max-width: 560px;">
+        <p class="img-caption">Real-world data: 30 processes across 7 categories captured in controlled indoor settings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Metrics -->
+<section id="metrics">
+  <div class="container">
+    <h2>Evaluation Metrics</h2>
+    <p class="section-desc">
+      We combine automated metrics with VQA-based evaluation to capture both low-level fidelity and high-level semantic correctness.
+    </p>
+
+    <h3>General Video Quality</h3>
+    <div class="card">
+      <p><strong>Visual Quality</strong> &mdash; AestheticScore + CLIP-IQA+ averaged (0&ndash;100)</p>
+      <p><strong>Motion Smoothness</strong> &mdash; RAFT optical-flow warp stability (V+R phases)</p>
+      <p><strong>Object Identity Consistency</strong> &mdash; DINOv2 patch-token similarity, first frame vs. R-phase</p>
+      <p><strong>Geo3D Consistency</strong> &mdash; Depth Anything V2 cosine similarity between consecutive depth maps</p>
+    </div>
+
+    <h3>Memory-Specific Metrics</h3>
+    <div class="card">
+      <p><strong>Object Reappearance Score (ORS)</strong> &mdash; SAM-3 text-prompted detection rate &times; confidence in R-phase</p>
+      <p><strong>Pixel-Level Fidelity</strong> &mdash; PSNR, SSIM, LPIPS against ground-truth video</p>
+      <p><strong>Camera Controllability</strong> &mdash; ATE rotation RMSE via MapAnything pose estimation</p>
+    </div>
+
+    <h3>VQA Dimensions</h3>
+    <div class="card">
+      <p><strong>Instruction Following</strong> &mdash; Does the video execute spatiotemporal instructions from the prompt?</p>
+      <p><strong>Object &amp; Background Consistency</strong> &mdash; Are foreground/background elements stable across frames?</p>
+      <p><strong>Continuity of Memory</strong> &mdash; Does the model maintain object identity after disappearance?</p>
+      <p><strong>Physics Adherence</strong> &mdash; Is locomotion, gravity, lighting physically plausible?</p>
+    </div>
+
+    <div class="img-full" style="margin: 24px 0;">
+      <img src="images/VQA_pipeline_v10.jpg" alt="VQA Pipeline" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border); background: white;">
+      <p class="img-caption">VQA evaluation pipeline: for each clip, we generate dimension-specific questions, filter against ground-truth video and failure cases, then query a VLM to produce per-dimension scores.</p>
+    </div>
+
+    <!-- Detailed VQA Pipeline -->
+    <h3 id="detail-vqa">Detailed VQA Pipeline</h3>
+    <p class="section-desc">
+      Walk through the three filtering stages on real example clips. Toggle between scenes and advance through the pipeline stages.
+    </p>
+
+    <div class="clip-selector" id="vqa-scene-selector">
+      <button class="clip-btn active" onclick="switchVqaScene('nordic')">Nordic #001</button>
+      <button class="clip-btn" onclick="switchVqaScene('zen')">Zen Garden #005</button>
+      <button class="clip-btn" onclick="switchVqaScene('citypark')">City Park #007</button>
+      <button class="clip-btn" onclick="switchVqaScene('nyceast')">NYC East #016</button>
+      <button class="clip-btn" onclick="switchVqaScene('nystreet')">NY Street #003</button>
+      <button class="clip-btn" onclick="switchVqaScene('wintertown')">Winter Town #002</button>
+    </div>
+
+    <div class="card" style="position:relative;">
+      <!-- Stage tabs -->
+      <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+        <button class="clip-btn active" id="vqa-stage-btn-1" onclick="switchVqaStage(1)">Stage 1: LLM Generation</button>
+        <button class="clip-btn" id="vqa-stage-btn-2" onclick="switchVqaStage(2)">Stage 2: Question Filtering</button>
+        <button class="clip-btn" id="vqa-stage-btn-3" onclick="switchVqaStage(3)">Stage 3: Evaluation</button>
+      </div>
+
+      <p id="vqa-stage-desc" style="margin-bottom:16px; color: var(--text-muted); font-size:0.95rem;"></p>
+
+      <div id="vqa-pipeline-display"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Automated Results -->
+<section id="results-auto" style="background: white;">
+  <div class="container">
+    <h2>Automated Evaluation Results</h2>
+
+    <div class="card" style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>VisQual &uarr;</th>
+            <th>MotSmooth &uarr;</th>
+            <th>ObjConsist &uarr;</th>
+            <th>3DConsist &uarr;</th>
+            <th>ORS &uarr;</th>
+            <th>PSNR &uarr;</th>
+            <th>SSIM &uarr;</th>
+            <th>LPIPS &darr;</th>
+            <th>CamCtrl &uarr;</th>
+            <th>ImgReward &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="11" class="group-header">CI2V Models</td></tr>
+          <tr>
+            <td>LingBot-World</td><td>47.4</td><td>57.6</td><td>59.0</td><td>88.2</td>
+            <td class="best">0.381</td><td class="second">14.41</td><td class="second">0.490</td>
+            <td class="second">0.482</td><td class="second">37.4</td><td class="second">36.7</td>
+          </tr>
+          <tr>
+            <td>Wan2.2</td><td>40.0</td><td>54.0</td><td>50.7</td><td>84.5</td>
+            <td>0.328</td><td>13.76</td><td>0.469</td><td>0.529</td><td>29.8</td><td>26.1</td>
+          </tr>
+          <tr>
+            <td>FantasyWorld</td><td class="second">51.0</td><td>55.2</td><td>47.6</td><td>88.7</td>
+            <td>0.276</td><td>13.23</td><td>0.427</td><td>0.571</td><td>27.2</td><td>30.7</td>
+          </tr>
+          <tr><td colspan="11" class="group-header">3D-based Models</td></tr>
+          <tr>
+            <td>Matrix-Game 2.0</td><td class="best">61.2</td><td class="second">83.6</td><td>46.5</td><td>93.7</td>
+            <td>0.157</td><td>13.49</td><td>0.376</td><td>0.550</td><td>17.3</td><td>22.3</td>
+          </tr>
+          <tr>
+            <td>Stable Virtual Camera</td><td>43.3</td><td>63.1</td><td class="second">59.5</td><td>88.5</td>
+            <td>0.294</td><td class="best">15.36</td><td class="best">0.523</td><td class="best">0.455</td>
+            <td class="best">65.2</td><td>22.3</td>
+          </tr>
+          <tr><td colspan="11" class="group-header">I2V Models</td></tr>
+          <tr>
+            <td>Open-SoRA</td><td>49.7</td><td>68.3</td><td>47.2</td><td>89.7</td>
+            <td>0.182</td><td>12.54</td><td>0.384</td><td>0.566</td><td>16.8</td><td>31.3</td>
+          </tr>
+          <tr>
+            <td>LTX-Video</td><td>44.9</td><td class="best">84.4</td><td class="best">81.6</td><td class="best">94.1</td>
+            <td class="second">0.330</td><td>13.42</td><td>0.455</td><td>0.518</td><td>17.1</td><td class="best">37.1</td>
+          </tr>
+          <tr>
+            <td>CogVideoX</td><td>40.1</td><td>59.8</td><td>54.0</td><td class="second">94.0</td>
+            <td>0.251</td><td>12.07</td><td>0.480</td><td>0.592</td><td>12.0</td><td>34.9</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Key Findings</h3>
+
+    <div class="finding">
+      <strong>Finding 1:</strong> Explicit 3D representations enable precise but not universal trajectory control.
+      SVC achieves 65.2% Camera Controllability via direct pose conditioning, while Matrix-Game 2.0 (action-conditioned)
+      scores only 17.3%, comparable to I2V models.
+    </div>
+
+    <div class="finding">
+      <strong>Finding 2:</strong> Camera inactivity inflates consistency metrics.
+      LTX-Video tops 3 of 4 quality metrics by barely moving the camera, trivially maximizing smoothness and identity consistency.
+    </div>
+
+    <div class="finding">
+      <strong>Finding 3:</strong> A trade-off emerges between geometric fidelity and perceptual quality.
+      SVC leads all pixel-level metrics but records the second-lowest Visual Quality;
+      Matrix-Game 2.0 achieves the highest Visual Quality but ranks among the lowest in SSIM.
+    </div>
+
+    <div class="finding">
+      <strong>Finding 4:</strong> Camera conditioning alone does not ensure object memory.
+      No model exceeds an ORS of 0.4 &mdash; even the best model fails to reliably re-detect
+      the target object in the majority of reappearance frames.
+    </div>
+  </div>
+</section>
+
+<!-- VQA Results -->
+<section id="results-vqa">
+  <div class="container">
+    <h2>VQA-based Evaluation Results</h2>
+
+    <div class="card" style="overflow-x: auto; max-width: 700px; margin: 0 auto 24px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Inst.Fol. &uarr;</th>
+            <th>Obj.&amp;Bkg. &uarr;</th>
+            <th>Cont.Mem. &uarr;</th>
+            <th>Phys.Adh. &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="5" class="group-header">CI2V Models</td></tr>
+          <tr><td>LingBot-World</td><td class="best">64.2</td><td>44.4</td><td>42.1</td><td>53.6</td></tr>
+          <tr><td>Wan2.2</td><td class="second">50.6</td><td>30.2</td><td>36.8</td><td>38.9</td></tr>
+          <tr><td>FantasyWorld</td><td>50.5</td><td>25.6</td><td>37.1</td><td>33.6</td></tr>
+          <tr><td colspan="5" class="group-header">3D-based Models</td></tr>
+          <tr><td>Matrix-Game 2.0</td><td>37.5</td><td>12.7</td><td>36.5</td><td>21.8</td></tr>
+          <tr><td>Stable Virtual Camera</td><td>49.7</td><td>23.8</td><td>29.6</td><td>33.3</td></tr>
+          <tr><td colspan="5" class="group-header">I2V Models</td></tr>
+          <tr><td>Open-SoRA</td><td>43.2</td><td class="second">66.8</td><td class="second">48.3</td><td class="second">59.7</td></tr>
+          <tr><td>LTX-Video</td><td>41.0</td><td class="best">76.6</td><td class="best">57.0</td><td class="best">63.5</td></tr>
+          <tr><td>CogVideoX</td><td>40.5</td><td>52.4</td><td>42.7</td><td>42.8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="finding">
+      <strong>Finding 5:</strong> Instruction Following reverses the ranking: CI2V models lead, confirming that
+      camera conditioning is necessary for executing spatiotemporal instructions. High scores on other dimensions
+      from I2V models reflect the absence of viewpoint change, not faithful generation.
+    </div>
+
+    <div class="finding">
+      <strong>Finding 6:</strong> Continuity of Memory remains universally low. Even the best score (LTX-Video, 57.0)
+      is achieved through camera inactivity. Among models that actively follow the trajectory,
+      fewer than half of memory-related questions are answered correctly.
+    </div>
+  </div>
+</section>
+
+<!-- Model Performance Radar Charts -->
+<section id="radar" style="background: white;">
+  <div class="container">
+    <h2>Model Performance Overview</h2>
+    <p class="section-desc">
+      Radar charts summarizing per-model strengths across automated metrics and VQA dimensions.
+    </p>
+    <div class="img-row">
+      <div>
+        <img src="images/radar_chart.png" alt="Automated Metrics Radar Chart">
+        <p class="img-caption">Automated metrics (7 axes, normalized). Higher area = stronger overall performance.</p>
+      </div>
+      <div>
+        <img src="images/radar_vqa.png" alt="VQA Dimensions Radar Chart">
+        <p class="img-caption">VQA dimensions (4 axes). CI2V models lead Instruction Following; I2V models lead other dimensions via camera inactivity.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Human Validation -->
+<section id="validation" style="background: white;">
+  <div class="container">
+    <h2>Human Validation</h2>
+    <p class="section-desc">
+      We validate our VQA pipeline by comparing VLM-generated answers with human judgments from 30 respondents
+      (Ph.D.-level researchers and experienced AI engineers) on 96 questions across 12 scenes.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="number">92.9%</div>
+        <div class="label">Overall agreement rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">&kappa; = 0.85</div>
+        <div class="label">Cohen's Kappa (majority vote)</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">30</div>
+        <div class="label">Human responses collected</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">96</div>
+        <div class="label">Validated questions</div>
+      </div>
+    </div>
+
+    <div class="img-full">
+      <img src="images/human_vlm_heatmap.png" alt="Human-VLM Agreement Heatmap" style="max-width: 800px;">
+      <p class="img-caption">Per-scene, per-dimension agreement rate between human majority answers and VLM-generated ground-truth answers.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>MemoBench &mdash; Anonymous ECCV 2026 Submission #2122</p>
+    <p style="margin-top: 8px; font-size: 0.8rem;">This is an offline supplementary page. All videos are stored locally.</p>
+  </div>
+</footer>
+
+<style>
+  .carousel-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+  }
+  .carousel-center { flex: 1; min-width: 0; }
+  .carousel-arrow {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: var(--card);
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 200px;
+    transition: all 0.2s;
+    color: var(--text-muted);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .carousel-arrow:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .carousel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .carousel-counter {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .carousel-title {
+    font-size: 1.3rem;
+    margin: 0;
+    color: var(--text);
+    flex: 1;
+  }
+  .carousel-type {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .carousel-type.syn { background: #dbeafe; color: #1d4ed8; }
+  .carousel-type.real { background: #dcfce7; color: #166534; }
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .ctrl-btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .ctrl-play { background: var(--primary); color: white; }
+  .ctrl-play:hover { background: #1d4ed8; }
+  .ctrl-pause { background: #64748b; color: white; }
+  .ctrl-pause:hover { background: #475569; }
+  .carousel-dots {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+  }
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .carousel-dot:hover { background: #94a3b8; }
+  .carousel-dot.active { background: var(--primary); border-color: var(--primary); }
+  .carousel-dot.syn-dot { background: #93c5fd; }
+  .carousel-dot.real-dot { background: #86efac; }
+  .carousel-dot.syn-dot.active { background: #2563eb; }
+  .carousel-dot.real-dot.active { background: #16a34a; }
+
+  /* Top clip navigation bar */
+  .clip-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+  }
+  .topbar-arrow {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .topbar-arrow:hover { background: var(--primary-light); color: var(--primary); }
+  .topbar-clips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    flex: 1;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .topbar-clips::-webkit-scrollbar { display: none; }
+  .topbar-chip {
+    flex-shrink: 0;
+    padding: 6px 16px;
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+    color: var(--text-muted);
+  }
+  .topbar-chip:hover { border-color: #94a3b8; color: var(--text); }
+  .topbar-chip.active-syn {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .topbar-chip.active-real {
+    border-color: var(--accent-green);
+    background: #dcfce7;
+    color: var(--accent-green);
+    font-weight: 600;
+  }
+  .topbar-chip .chip-type {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 4px;
+    opacity: 0.7;
+  }
+</style>
+
+<script>
+const models = [
+  { key: 'lingbot',      name: 'LingBot-World',          tag: 'CI2V',  tagClass: 'tag-ci2v' },
+  { key: 'wan',          name: 'Wan2.2',                  tag: 'CI2V',  tagClass: 'tag-ci2v' },
+  { key: 'fantasyworld', name: 'FantasyWorld',            tag: 'CI2V',  tagClass: 'tag-ci2v' },
+  { key: 'matrixgame',   name: 'Matrix-Game 2.0',         tag: '3D',    tagClass: 'tag-3d' },
+  { key: 'svc',          name: 'Stable Virtual Camera',   tag: '3D',    tagClass: 'tag-3d' },
+  { key: 'opensora',     name: 'Open-SoRA',               tag: 'I2V',   tagClass: 'tag-i2v' },
+  { key: 'ltxvideo',     name: 'LTX-Video',               tag: 'I2V',   tagClass: 'tag-i2v' },
+  { key: 'cogvideo',     name: 'CogVideoX',               tag: 'I2V',   tagClass: 'tag-i2v' },
+];
+
+const clips = [
+  { id: 'Nordic_005',     title: 'Nordic Village',          type: 'Synthetic' },
+  { id: 'CityPark_006',   title: 'City Park',               type: 'Synthetic' },
+  { id: 'Japanese_Street_005', title: 'Japanese Street',     type: 'Synthetic' },
+  { id: 'Real_007',       title: 'Coffee Powder Dissolving', type: 'Real' },
+  { id: 'Real_020',       title: 'Iodine Solution Mixing',  type: 'Real' },
+  { id: 'Real_024',       title: 'Expanding Foam',          type: 'Real' },
+];
+
+let currentIdx = 0;
+
+function renderTopbar() {
+  const container = document.getElementById('topbar-clips');
+  container.innerHTML = clips.map((c, i) => {
+    const activeClass = i === currentIdx
+      ? (c.type === 'Synthetic' ? 'active-syn' : 'active-real')
+      : '';
+    const typeLabel = c.type === 'Synthetic' ? 'SYN' : 'REAL';
+    return `<span class="topbar-chip ${activeClass}" onclick="renderClip(${i})">${c.id} <span class="chip-type">${typeLabel}</span></span>`;
+  }).join('');
+  // Scroll active chip into view
+  const activeChip = container.querySelector('.active-syn, .active-real');
+  if (activeChip) activeChip.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+
+function scrollTopbar(dir) {
+  const el = document.getElementById('topbar-clips');
+  el.scrollBy({ left: dir * 200, behavior: 'smooth' });
+}
+
+function renderClip(idx) {
+  currentIdx = idx;
+  const clip = clips[idx];
+  const container = document.getElementById('clip-display');
+
+  // Update header
+  document.getElementById('carousel-counter').textContent = `${idx + 1} / ${clips.length}`;
+  document.getElementById('carousel-title').textContent = clip.title;
+  const typeEl = document.getElementById('carousel-type');
+  typeEl.textContent = clip.type;
+  typeEl.className = 'carousel-type ' + (clip.type === 'Synthetic' ? 'syn' : 'real');
+
+  // Update top bar
+  renderTopbar();
+
+  // Update dots
+  const dotsEl = document.getElementById('carousel-dots');
+  dotsEl.innerHTML = clips.map((c, i) =>
+    `<span class="carousel-dot ${i === idx ? 'active' : ''} ${c.type === 'Synthetic' ? 'syn-dot' : 'real-dot'}"
+          onclick="renderClip(${i})" title="${c.title}"></span>`
+  ).join('');
+
+  // Build video grid
+  let html = '<div class="video-grid">';
+  html += `
+    <div class="video-card">
+      <video src="videos/${clip.id}_gt.mp4" controls muted loop playsinline></video>
+      <div class="video-label">Ground Truth <span class="video-tag tag-gt">GT</span></div>
+    </div>`;
+  models.forEach(m => {
+    html += `
+      <div class="video-card">
+        <video src="videos/${clip.id}_${m.key}.mp4" controls muted loop playsinline></video>
+        <div class="video-label">${m.name} <span class="video-tag ${m.tagClass}">${m.tag}</span></div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Auto-play all videos after rendering
+  playAll();
+}
+
+function nextClip() {
+  renderClip((currentIdx + 1) % clips.length);
+}
+
+function prevClip() {
+  renderClip((currentIdx - 1 + clips.length) % clips.length);
+}
+
+function playAll() {
+  document.querySelectorAll('#clip-display video').forEach(v => {
+    v.currentTime = 0;
+    v.play();
+  });
+}
+
+function pauseAll() {
+  document.querySelectorAll('#clip-display video').forEach(v => v.pause());
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') prevClip();
+  if (e.key === 'ArrowRight') nextClip();
+});
+
+// IntersectionObserver: auto-play when qualitative section scrolls into view
+const qualSection = document.getElementById('qualitative');
+const qualObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      playAll();
+    } else {
+      pauseAll();
+    }
+  });
+}, { threshold: 0.2 });
+qualObserver.observe(qualSection);
+
+// Init
+renderClip(0);
+
+// ---- Detailed VQA Pipeline ----
+const vqaData = {
+  nordic: {
+    label: 'Nordic #001',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the observer re-encounter the subject in their field of view after completing the U-turn?', status: 'keep' },
+          { text: 'Does the observer execute a U-turn after the subject has exited the field of view?', status: 'failure' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: 'Does the subject maintain its silver robotic appearance throughout the entire sequence?', status: 'keep' },
+          { text: 'Does the Nordic architecture of the street maintain its structural details during the camera rotation?', status: 'keep' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: 'Does the street layout change its configuration (e.g., buildings swapping sides) after the observer turns around?', status: 'keep' },
+          { text: 'Is the subject located in a logically consistent position on the street when the observer turns back around?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Do the shadows cast by the subject and buildings move realistically as the observer changes perspective?', status: 'keep' },
+          { text: "Does the subject's walking speed remain consistent and natural as it crosses the road?", status: 'failure' },
+        ]
+      }
+    }
+  },
+  zen: {
+    label: 'Zen Garden #005',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the observer successfully perform a U-turn and see the person again?', status: 'keep' },
+          { text: 'Does the person continue moving in a consistent direction after the fox completes the turn?', status: 'failure' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: "Is the 'Zen Garden' aesthetic and landscape layout preserved throughout the full sequence?", status: 'keep' },
+          { text: 'Does the ground texture flicker or disappear as the fox runs?', status: 'gt' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: "Is the character's walking animation continuous even when they are not the focus of the frame?", status: 'keep' },
+          { text: 'Does the person reappear at a location consistent with their original trajectory after the U-turn?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Do the shadows cast by the trees remain in a fixed orientation relative to the sun?', status: 'keep' },
+          { text: "Does the foliage jitter or 'vibrate' unnaturally as the camera moves past it?", status: 'gt' },
+        ]
+      }
+    }
+  },
+  citypark: {
+    label: 'City Park #007',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the subject in the front-left initially run towards the back-right of the park?', status: 'keep' },
+          { text: 'Does the observer turn their head back to the left after turning to the right?', status: 'keep' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: 'Does the subject\'s appearance change significantly (e.g., from a silver mannequin to a human) after the camera pans?', status: 'keep' },
+          { text: 'Does the fence in the foreground change its shape or material as the observer moves?', status: 'keep' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: 'Does the person on the chair maintain their standing state after the camera pans away and returns?', status: 'keep' },
+          { text: 'Is the runner\'s momentum preserved such that their position upon reappearance reflects continuous movement?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Are the shadows of the subject and objects cast consistently based on the sunlight\'s direction?', status: 'keep' },
+          { text: 'Do the runner\'s feet slide or glide across the ground in a way that suggests a lack of friction?', status: 'gt' },
+        ]
+      }
+    }
+  },
+  nyceast: {
+    label: 'NYC East #016',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the subject initially positioned in front of the camera run toward the right side of the frame?', status: 'keep' },
+          { text: 'Does the subject reappear moving in a direction other than the camera\'s front-left?', status: 'gt' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: 'Does the red brick building on the corner significantly change its geometry or color during the camera pan?', status: 'keep' },
+          { text: 'Does the person walking in the front-left morph into a different object or character during their movement?', status: 'keep' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: 'Does the subject reappear in a location that logically follows their previous trajectory while they were off-screen?', status: 'keep' },
+          { text: 'Does the subject seem to \'teleport\' to a new position that contradicts their speed and direction of travel?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Do static objects like trees or lamp posts warp or bend unnaturally during the camera rotation?', status: 'keep' },
+          { text: 'Does the running subject appear to slide across the ground without their feet making proper contact with the surface?', status: 'failure' },
+        ]
+      }
+    }
+  },
+  nystreet: {
+    label: 'NY Street #003',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the observer begin by moving straight ahead down the New York street?', status: 'keep' },
+          { text: 'Does the observer fail to see the sports car again after completing the U-turn?', status: 'keep' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: 'Does the sports car maintain the same visual model and color throughout the video?', status: 'keep' },
+          { text: 'Do the humanoid figures in the background remain visually consistent in their locations and appearance?', status: 'gt' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: 'Does the observer face the correct direction (back where they came from) after finishing the U-turn?', status: 'keep' },
+          { text: 'Does the car suddenly reappear in the exact same starting position as if it had never moved while off-screen?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Does the lighting on the car\'s surface reflect the surrounding environment realistically as it moves?', status: 'keep' },
+          { text: 'Do the buildings or the horizon line jitter or warp unnaturally during the camera\'s rotation?', status: 'gt' },
+        ]
+      }
+    }
+  },
+  wintertown: {
+    label: 'Winter Town #002',
+    dimensions: {
+      'Instruction Following': {
+        questions: [
+          { text: 'Does the observer turn left instead of following a curved path to the right?', status: 'keep' },
+          { text: 'Does the subject remain stationary instead of continuing their motion throughout the video?', status: 'failure' },
+        ]
+      },
+      'Object & Background': {
+        questions: [
+          { text: 'Do the yellow road lines remain consistent in color and style across the bridge?', status: 'keep' },
+          { text: 'Is the distant \'Wintertown\' background consistent in layout before and after the observer\'s turn?', status: 'failure' },
+        ]
+      },
+      'Continuity of Memory': {
+        questions: [
+          { text: 'Does the environment behind the observer (when they turn around) match the bridge they just walked across?', status: 'keep' },
+          { text: 'Does the subject appear to have progressed in distance logically while they were off-screen?', status: 'failure' },
+        ]
+      },
+      'Physics Adherence': {
+        questions: [
+          { text: 'Do the shadows cast by the robots align consistently with the position of the sun?', status: 'keep' },
+          { text: 'Is the walking speed of the observer and the subject consistent with a natural human gait?', status: 'failure' },
+        ]
+      }
+    }
+  }
+};
+
+const vqaStageDescs = {
+  1: 'The LLM generates 2 candidate questions per dimension (8 total). All questions are active.',
+  2: 'Questions are filtered against the ground-truth video (removing questions whose premise does not hold) and failure-case videos (removing questions that are trivially answered). This produces the final question bank.',
+  3: 'The filtered question bank is applied to the test video. A VLM watches the generated video and answers each remaining question to produce per-dimension scores.'
+};
+
+let currentVqaScene = 'nordic';
+let currentVqaStage = 1;
+
+function switchVqaScene(scene) {
+  currentVqaScene = scene;
+  document.querySelectorAll('#vqa-scene-selector .clip-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderVqaPipeline();
+}
+
+function switchVqaStage(stage) {
+  currentVqaStage = stage;
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('vqa-stage-btn-' + i).classList.toggle('active', i === stage);
+  }
+  renderVqaPipeline();
+}
+
+function renderVqaPipeline() {
+  const data = vqaData[currentVqaScene];
+  const stage = currentVqaStage;
+  document.getElementById('vqa-stage-desc').textContent = vqaStageDescs[stage];
+
+  let html = '';
+  const dims = Object.values(data.dimensions);
+  const total = dims.reduce((s, d) => s + d.questions.length, 0);
+  const kept = dims.reduce((s, d) => s + d.questions.filter(q => q.status === 'keep').length, 0);
+
+  if (stage === 3) {
+    // Stage 3: show only kept questions as final evaluation bank
+    html += `<div style="padding:14px 18px; margin-bottom:20px; background:linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%); border-radius:10px; display:flex; align-items:center; gap:12px;">`;
+    html += `<span style="font-size:1.5rem;">&#127916;</span>`;
+    html += `<div><strong>Test video submitted to VLM</strong><br><span style="font-size:0.85rem; color:var(--text-muted);">The VLM watches the generated video and answers each question below. Per-dimension scores are aggregated from the answers.</span></div>`;
+    html += `</div>`;
+
+    for (const [dim, info] of Object.entries(data.dimensions)) {
+      const keptQs = info.questions.filter(q => q.status === 'keep');
+      if (keptQs.length === 0) continue;
+      html += `<div style="margin-bottom:16px;">`;
+      html += `<h4 style="font-size:0.95rem; margin-bottom:8px; color:var(--primary);">${dim}</h4>`;
+      keptQs.forEach(q => {
+        html += `<div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; margin:6px 0; background:#f0fdf4; border-left:3px solid var(--primary); border-radius:0 6px 6px 0;">`;
+        html += `<span style="color:var(--primary); font-weight:700; font-size:1.1rem; flex-shrink:0; margin-top:1px;">Q</span>`;
+        html += `<span style="font-size:0.9rem;">${q.text}</span>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `<div style="margin-top:16px; padding:10px 16px; background:#f1f5f9; border-radius:8px; font-size:0.9rem; font-weight:600;">`;
+    html += `Final question bank: <span style="color:var(--primary);">${kept}</span> / ${total} questions &rarr; VLM scores per dimension`;
+    html += `</div>`;
+
+  } else {
+    // Stage 1 & 2: show all questions with filtering status
+    for (const [dim, info] of Object.entries(data.dimensions)) {
+      html += `<div style="margin-bottom:16px;">`;
+      html += `<h4 style="font-size:0.95rem; margin-bottom:8px; color:var(--primary);">${dim}</h4>`;
+      info.questions.forEach(q => {
+        let filtered = false;
+        let filterLabel = '';
+
+        if (stage >= 2 && q.status === 'gt') {
+          filtered = true;
+          filterLabel = 'Filtered by GT';
+        }
+        if (stage >= 2 && q.status === 'failure') {
+          filtered = true;
+          filterLabel = 'Filtered by Failure';
+        }
+
+        const bgColor = filtered ? '#fef2f2' : '#f0fdf4';
+        const borderColor = filtered ? '#fca5a5' : '#86efac';
+        const icon = filtered ? '&#10007;' : '&#10003;';
+        const iconColor = filtered ? 'var(--accent-red)' : 'var(--accent-green)';
+        const textStyle = filtered ? 'text-decoration: line-through; opacity: 0.6;' : '';
+
+        html += `<div style="display:flex; align-items:flex-start; gap:10px; padding:10px 14px; margin:6px 0; background:${bgColor}; border-left:3px solid ${borderColor}; border-radius:0 6px 6px 0;">`;
+        html += `<span style="color:${iconColor}; font-weight:700; font-size:1.1rem; flex-shrink:0; margin-top:1px;">${icon}</span>`;
+        html += `<span style="font-size:0.9rem; ${textStyle}">${q.text}`;
+        if (filtered) {
+          html += ` <span style="font-size:0.75rem; background:${borderColor}; color:white; padding:1px 8px; border-radius:10px; margin-left:6px; text-decoration:none; display:inline-block;">${filterLabel}</span>`;
+        }
+        html += `</span></div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `<div style="margin-top:16px; padding:10px 16px; background:#f1f5f9; border-radius:8px; font-size:0.9rem; font-weight:600;">`;
+    html += `Questions remaining: <span style="color:var(--primary);">${kept}</span> / ${total}`;
+    if (stage === 1) html += ` (no filtering yet)`;
+    html += `</div>`;
+  }
+
+  document.getElementById('vqa-pipeline-display').innerHTML = html;
+}
+
+renderVqaPipeline();
+</script>
+
+</body>
+</html>
