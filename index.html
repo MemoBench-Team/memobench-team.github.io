@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MemoBench: Benchmarking World Modeling in Dynamically Changing Environments</title>
@@ -144,6 +145,32 @@
     margin-top: 4px;
   }
 
+  /* Container that keeps everything on one row */
+  .button-group {
+    display: flex;         /* Activates flexbox layout */
+    justify-content: center;  /* Centers the buttons horizontally */
+    flex-direction: row;   /* Aligns children horizontally */
+    gap: 15px;             /* Creates equal space between buttons */
+    margin: 20px 0;        /* Outer margin for the entire row (top/bottom) */
+  }
+
+  /* Individual button styling */
+  .button-box {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    /* font-weight: bold; */
+    text-align: center;
+    transition: background-color 0.2s;
+    }
+  .button-box:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
   /* Tables */
   table {
     width: 100%;
@@ -272,6 +299,12 @@
     <p class="subtitle">Benchmarking World Modeling in Dynamically Changing Environments</p>
     <span class="venue">ECCV 2026 Submission #2122</span>
     <p class="anon-note">Anonymous submission &mdash; author information withheld for review</p>
+    <div class="button-group">
+      <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-regular fa-file-lines"></i> Paper</a>
+      <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-solid fa-code"></i> Code</a>
+      <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-solid fa-database"></i> Dataset</a>
+      <a href="https://huggingface.co/spaces/cavenqjw/MemoBench_Leaderboard" target="_blank" class="button-box"><i class="fa-solid fa-trophy"></i> Leaderboard</a> 
+	  </div>
   </div>
 </header>
 
@@ -494,7 +527,10 @@
 <section id="results-auto" style="background: white;">
   <div class="container">
     <h2>Automated Evaluation Results</h2>
-
+    <div>
+      See our <a href="https://huggingface.co/spaces/cavenqjw/MemoBench_Leaderboard" target="_blank"><img src="https://img.shields.io/badge/Leaderboard-Huggingface-yellow?logo=huggingface&amp;logoColor=yellow"></a>
+    for the latest ranking and numerical results.
+    </div>
     <div class="card" style="overflow-x: auto;">
       <table>
         <thead>
