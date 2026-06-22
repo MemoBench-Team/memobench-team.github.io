@@ -34,7 +34,7 @@
     text-align: center;
   }
   header h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
-  header .subtitle { font-size: 1.2rem; opacity: 0.9; max-width: 800px; margin: 0 auto 24px; }
+  header .subtitle { font-size: 1.4rem; opacity: 0.9; max-width: 800px; margin: 0 auto 24px; }
   header .venue {
     display: inline-block;
     font-size: 0.95rem;
@@ -171,6 +171,42 @@
     background-color: rgba(255, 255, 255, 0.3);
   }
 
+  /* Author */
+  .author-container {
+    text-align: center;
+    margin: 20px auto;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #ffffff; /* Matches your white text on blue header */
+  }
+
+  .author-names {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+  }
+
+  .author-names a {
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.2s ease;
+  }
+
+  .author-names a:hover {
+      text-decoration: underline;
+      color: #e0e0e0;
+  }
+
+  .author-affiliations {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 12px;
+  }
+
+  .author-venue {
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+  }
+
   /* Tables */
   table {
     width: 100%;
@@ -297,12 +333,56 @@
   <div class="container">
     <h1>MemoBench</h1>
     <p class="subtitle">Benchmarking World Modeling in Dynamically Changing Environments</p>
-    <span class="venue">ECCV 2026 Submission #2122</span>
-    <p class="anon-note">Anonymous submission &mdash; author information withheld for review</p>
+    <div class="author-container">
+      <div class="author-names">
+          <!-- <a href="https://homepage-link.com" target="_blank">Haoyu Chen</a><sup>1</sup>,
+          <a href="https://homepage-link.com" target="_blank">Kaichen Zhou</a><sup>1,2</sup>,
+          <a href="https://homepage-link.com" target="_blank">Hang Hua</a><sup>3</sup>,
+          <a href="https://homepage-link.com" target="_blank">Kaile Zhang</a><sup>4</sup>,
+          <a href="https://homepage-link.com" target="_blank">Jingwen Qian</a><sup>5</sup>,
+          <a href="https://homepage-link.com" target="_blank">Wufei Ma</a><sup>6</sup>,
+          <a href="https://homepage-link.com" target="_blank">Haonan Chen</a><sup>1</sup>,
+          <a href="https://homepage-link.com" target="_blank">Chunjiang Liu</a><sup>7</sup>,
+          <a href="https://homepage-link.com" target="_blank">Yizhou Zhao</a><sup>7</sup>,
+          <a href="https://homepage-link.com" target="_blank">Xiaoyuan Wang</a><sup>7</sup>,
+          <a href="https://homepage-link.com" target="_blank">Weiyue Li</a><sup>1</sup>,
+          <a href="https://homepage-link.com" target="_blank">Alan Yuille</a><sup>6</sup>,
+          <a href="https://homepage-link.com" target="_blank">Paul Pu Liang</a><sup>2</sup>
+          <a href="https://homepage-link.com" target="_blank">Yilun Du</a><sup>1*</sup> -->
+          <a>Haoyu Chen</a><sup>1</sup>,
+          <a>Kaichen Zhou</a><sup>1,2</sup>,
+          <a>Hang Hua</a><sup>3</sup>,
+          <a>Kaile Zhang</a><sup>4</sup>,
+          <a>Jingwen Qian</a><sup>5</sup>,
+          <a>Wufei Ma</a><sup>6</sup>,
+          <a>Haonan Chen</a><sup>1</sup>,
+          <a>Chunjiang Liu</a><sup>7</sup>,
+          <a>Yizhou Zhao</a><sup>7</sup>,
+          <a>Xiaoyuan Wang</a><sup>7</sup>,
+          <a>Weiyue Li</a><sup>1</sup>,
+          <a>Alan Yuille</a><sup>6</sup>,
+          <a>Paul Pu Liang</a><sup>2</sup>
+          <a>Yilun Du</a><sup>1*</sup>
+      </div>
+      
+      <div class="author-affiliations">
+          <span><sup>1</sup>Harvard University</span>
+          <span><sup>2</sup>MIT</span>
+          <span><sup>3</sup>MIT-IBM Watson AI Lab</span>
+          <span><sup>4</sup>Boston University</span>
+          <span><sup>5</sup>Google</span>
+          <span><sup>6</sup>Johns Hopkins University</span>
+          <span><sup>7</sup>Carnegie Mellon University</span>
+      </div>
+      
+      <div class="author-venue">
+          <strong>ECCV 2026</strong>
+      </div>
+    </div>
     <div class="button-group">
       <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-regular fa-file-lines"></i> Paper</a>
-      <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-solid fa-code"></i> Code</a>
-      <a onclick="alert('Coming Soon!')" class="button-box"><i class="fa-solid fa-database"></i> Dataset</a>
+      <a href="https://github.com/MemoBench-Team/MemoBench" target="_blank" class="button-box"><i class="fa-solid fa-code"></i> Code</a>
+		  <a href="https://huggingface.co/datasets/tonyc54/MemoBench" target="_blank" class="button-box"><i class="fa-solid fa-database"></i> Dataset</a> 
       <a href="https://huggingface.co/spaces/cavenqjw/MemoBench_Leaderboard" target="_blank" class="button-box"><i class="fa-solid fa-trophy"></i> Leaderboard</a> 
 	  </div>
   </div>
