@@ -465,7 +465,7 @@
         <div class="label">Resolution (60 FPS syn / 30 FPS real)</div>
       </div>
       <div class="stat-card">
-        <div class="number">8</div>
+        <div id="model-count-display" class="number">8</div>
         <div class="label">Models benchmarked</div>
       </div>
       <div class="stat-card">
@@ -1342,6 +1342,33 @@ function renderVqaPipeline() {
 }
 
 renderVqaPipeline();
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Target the specific VQA table
+  const table = document.getElementById('results-vqa');
+  const countDisplay = document.getElementById('model-count-display');
+
+  if (table && countDisplay) {
+    let modelCount = 0;
+    
+    // 2. Select all rows within the table body
+    const rows = table.querySelectorAll('tbody tr');
+    
+    // 3. Loop through the rows to count the models
+    rows.forEach(row => {
+      // Subheaders (like "CI2V Models") usually have a single <td> with a colspan.
+      // Model rows will have multiple <td> elements (one for the name, others for scores).
+      const cells = row.querySelectorAll('td');
+      if (cells.length > 1) {
+        modelCount++;
+      }
+    });
+    
+    // 4. Update the text in the Overview section
+    countDisplay.textContent = modelCount;
+  }
+});
+
 </script>
 
 </body>
