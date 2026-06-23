@@ -555,7 +555,7 @@
     </div>
 
     <div class="img-full" style="margin: 24px 0;">
-      <img src="images/VQA_pipeline_v11.jpg" alt="VQA Pipeline" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border); background: white;">
+      <img src="images/VQA_pipeline_v12.png" alt="VQA Pipeline" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border); background: white;">
       <p class="img-caption">VQA evaluation pipeline: for each clip, we generate dimension-specific questions, filter against ground-truth video and failure cases, then query a VLM to produce per-dimension scores.</p>
     </div>
 
@@ -655,31 +655,6 @@
         </tbody>
       </table>
     </div>
-
-    <h3>Key Findings</h3>
-
-    <div class="finding">
-      <strong>Finding 1:</strong> Explicit 3D representations enable precise but not universal trajectory control.
-      SVC achieves 65.2% Camera Controllability via direct pose conditioning, while Matrix-Game 2.0 (action-conditioned)
-      scores only 17.3%, comparable to I2V models.
-    </div>
-
-    <div class="finding">
-      <strong>Finding 2:</strong> Camera inactivity inflates consistency metrics.
-      LTX-Video tops 3 of 4 quality metrics by barely moving the camera, trivially maximizing smoothness and identity consistency.
-    </div>
-
-    <div class="finding">
-      <strong>Finding 3:</strong> A trade-off emerges between geometric fidelity and perceptual quality.
-      SVC leads all pixel-level metrics but records the second-lowest Visual Quality;
-      Matrix-Game 2.0 achieves the highest Visual Quality but ranks among the lowest in SSIM.
-    </div>
-
-    <div class="finding">
-      <strong>Finding 4:</strong> Camera conditioning alone does not ensure object memory.
-      No model exceeds an ORS of 0.4 &mdash; even the best model fails to reliably re-detect
-      the target object in the majority of reappearance frames.
-    </div>
   </div>
 </section>
 
@@ -713,18 +688,6 @@
           <tr><td>CogVideoX</td><td>40.5</td><td>52.4</td><td>42.7</td><td>42.8</td></tr>
         </tbody>
       </table>
-    </div>
-
-    <div class="finding">
-      <strong>Finding 5:</strong> Instruction Following reverses the ranking: CI2V models lead, confirming that
-      camera conditioning is necessary for executing spatiotemporal instructions. High scores on other dimensions
-      from I2V models reflect the absence of viewpoint change, not faithful generation.
-    </div>
-
-    <div class="finding">
-      <strong>Finding 6:</strong> Continuity of Memory remains universally low. Even the best score (LTX-Video, 57.0)
-      is achieved through camera inactivity. Among models that actively follow the trajectory,
-      fewer than half of memory-related questions are answered correctly.
     </div>
   </div>
 </section>
